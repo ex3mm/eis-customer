@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/problem.schema.json",
+  "title": "Problem Details",
+  "type": "object",
+  "required": ["type", "title", "status"],
+  "properties": {
+    "type": {"type": "string"},
+    "title": {"type": "string"},
+    "status": {"type": "integer", "minimum": 400, "maximum": 599},
+    "detail": {"type": "string"},
+    "instance": {"type": "string"}
+  }
+}
+

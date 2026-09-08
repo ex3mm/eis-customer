@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/check-response.schema.json",
+  "title": "EIS customer accreditation check response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["inn", "kpp", "found", "sources", "checked_at"],
+  "properties": {
+    "inn": {"type": "string"},
+    "kpp": {"type": "string"},
+    "found": {"type": "boolean"},
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fz44", "fz223"],
+      "properties": {
+        "fz44": {"$ref": "#/$defs/source"},
+        "fz223": {"$ref": "#/$defs/source"}
+      }
+    },
+    "checked_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["found"],
+      "properties": {"found": {"type": "boolean"}}
+    }
+  }
+}
+

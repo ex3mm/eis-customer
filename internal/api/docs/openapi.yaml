@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: Проверка статуса аккредитации Заказчика на ЕИС
+  version: 1.0.0
+  description: Параллельная проверка реестров организаций 44-ФЗ и заказчиков 223-ФЗ.
+servers:
+  - url: /
+paths:
+  /health:
+    get:
+      summary: Проверка работоспособности
+      responses:
+        "200":
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: {type: string, example: ok}
+  /api/v1/accreditation/check:
+    post:
+      summary: Проверить наличие заказчика в ЕИС
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckRequest"
+      responses:
+        "200":
+          description: Оба реестра успешно проверены
+          headers:
+            X-Cache:
+              description: HIT при ответе из кеша, иначе MISS
+              schema: {type: string, enum: [HIT, MISS]}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckResponse"
+        "400":
+          description: Ошибка валидации
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+        "401":
+          description: Неверный API-ключ (если авторизация включена)
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+        "502":
+          description: Нельзя достоверно проверить оба источника
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CheckRequest:
+      type: object
+      additionalProperties: false
+      required: [inn, kpp]
+      properties:
+        inn:
+          type: string
+          pattern: "^(?:[0-9]{10}|[0-9]{12})$"
+          example: "6317024749"
+        kpp:
+          type: string
+          pattern: "^[0-9]{9}$"
+          example: "631701001"
+    SourceResult:
+      type: object
+      additionalProperties: false
+      required: [found]
+      properties:
+        found: {type: boolean}
+    CheckResponse:
+      type: object
+      additionalProperties: false
+      required: [inn, kpp, found, sources, checked_at]
+      properties:
+        inn: {type: string}
+        kpp: {type: string}
+        found:
+          type: boolean
+          description: true, если точное совпадение найдено хотя бы в одном реестре
+        sources:
+          type: object
+          required: [fz44, fz223]
+          properties:
+            fz44: {$ref: "#/components/schemas/SourceResult"}
+            fz223: {$ref: "#/components/schemas/SourceResult"}
+        checked_at: {type: string, format: date-time}
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        instance: {type: string}
+

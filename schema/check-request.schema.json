@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/check-request.schema.json",
+  "title": "EIS customer accreditation check request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["inn", "kpp"],
+  "properties": {
+    "inn": {"type": "string", "pattern": "^(?:[0-9]{10}|[0-9]{12})$"},
+    "kpp": {"type": "string", "pattern": "^[0-9]{9}$"}
+  }
+}
+
